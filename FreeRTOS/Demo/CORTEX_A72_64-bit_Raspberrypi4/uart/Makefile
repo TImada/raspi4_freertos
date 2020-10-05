@@ -1,5 +1,5 @@
 CROSS ?= aarch64-none-elf-
-CFLAGS =  -mcpu=cortex-a72 -fpic -ffreestanding -std=gnu99 -O2 -Wall -Wextra -I$(INCLUDEPATH1) -I$(INCLUDEPATH2) -I$(INCLUDEPATH3) -DGUEST
+CFLAGS = -mcpu=cortex-a72 -fpic -ffreestanding -std=gnu99 -O2 -Wall -Wextra -I$(INCLUDEPATH1) -I$(INCLUDEPATH2) -I$(INCLUDEPATH3) -DGUEST
 ASMFLAGS = -mcpu=cortex-a72
 
 INCLUDEPATH1 ?= ../../../Source/include
