@@ -41,7 +41,7 @@ start_el1:
 
 kick_core3:
 	mov   x1, #0xF0 // See https://github.com/raspberrypi/tools/blob/master/armstubs/armstub8.S
-	ldr   x2, =__start
+	ldr   x2, =_boot
 	str   x2, [x1]
     sev
 	mov   x0, #0x0
