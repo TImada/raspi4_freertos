@@ -151,4 +151,15 @@ on the u-boot prompt. You will see Linux boot process output on UART1(mini UART)
 
 ## 6. License
 
-MIT License (see `LICENSE.md` for the detail).
+Derived from FreeRTOS, MIT License (see `LICENSE.md` for the detail).
+```
+FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/
+FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/
+FreeRTOS/Source/
+```
+
+Derived from musl libc(https://musl.libc.org/), MIT License (see individual files for the detail).
+
+```
+FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/musl_libc/
+```
