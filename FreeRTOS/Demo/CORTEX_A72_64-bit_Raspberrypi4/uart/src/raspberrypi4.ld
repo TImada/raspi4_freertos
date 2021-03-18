@@ -1,11 +1,14 @@
 ENTRY(_boot)
 
-STACKTOP = 0x20800000;
+CODE_BASE   = 0x20000000;
+DATA_BASE   = 0x20200000;
+STACK_TOP   = 0x20600000;
+PT_BASE     = 0x20600000;
  
 SECTIONS
 {
-    /* Starts at 0x20000000 (assuming ends at 0x207FFFFF, 8MB). */
-    . = 0x20000000;
+    /* Starts at 0x20000000 (assuming ends at 0x208FFFFF, 9MB). */
+    . = CODE_BASE;
     __start = .;
     __text_start = .;
     .text :
@@ -14,10 +17,10 @@ SECTIONS
         KEEP(*(.text.boot))
         *(.text)
     }
-    . = ALIGN(4096); /* align to page size */
     __text_end = .;
  
-    __data_start = .;
+    . = ALIGN(4096); /* align to page size */
+    __data_start = DATA_BASE;
     .data :
     {
         *(.data)
@@ -35,7 +38,13 @@ SECTIONS
     __bss_end = .;
     __end = .;
 
-    . = STACKTOP ; /* stack memory */
+    . = STACK_TOP; /* stack memory */
     stack_top = .;
+
+    . = PT_BASE; /* Page tables */
+    .pt :
+    {
+        *(.pt)
+    }
 }
 __bss_size = (__bss_end - __bss_start)>>3;

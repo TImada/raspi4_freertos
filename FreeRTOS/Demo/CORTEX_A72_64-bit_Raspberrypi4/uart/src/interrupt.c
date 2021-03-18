@@ -44,6 +44,7 @@ int isr_register(uint32_t intno, uint32_t pri, uint32_t cpumask, void (*fn)(void
 		reg = (*addr) & ~(0xFFU << shift);
 		*addr = (reg | cpumask << shift);
 	}
+    asm volatile ("isb");
 
 	/* Handler registration */
     InterruptHandlerFunctionTable[intno].fn = fn;
@@ -59,6 +60,7 @@ void eoi_notify(uint32_t val)
 
 	addr = (uint32_t *)(GICC_BASE + 0x10U);
 	*addr = val;
+    asm volatile ("isb");
 
 	return;
 }   
@@ -70,7 +72,7 @@ void eoi_notify(uint32_t val)
  */
 void wait_gic_init(void)
 {
-	uint32_t *addr;
+	volatile uint32_t *addr;
 
 	addr = (uint32_t *)(GICD_BASE + 0x00U);
 
@@ -82,5 +84,5 @@ void wait_gic_init(void)
 	}
 
 	return;
-}   
+}
 /*-----------------------------------------------------------*/

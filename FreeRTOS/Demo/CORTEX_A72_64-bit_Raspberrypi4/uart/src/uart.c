@@ -3,9 +3,10 @@
 #include <stdint.h>
 
 #include "FreeRTOS.h"
-#include "semphr.h"
-#include "interrupt.h"
 #include "board.h"
+#include "interrupt.h"
+#include "semphr.h"
+#include "uart.h"
 
 /* PL011 UART on Raspberry pi 4B */
 #define UART_BASE  (0xFE201400U) /* UART2 */
@@ -36,6 +37,7 @@ void uart_putchar(uint8_t c)
 	/* wait until tx becomes idle. */
 	while ( UART_FR & (0x20) ) { }
 	UART_DR = c;
+    asm volatile ("isb");
 	xSemaphoreGive(uartctl->tx_mux);
 }
 /*-----------------------------------------------------------*/
@@ -46,6 +48,7 @@ void uart_putchar_isr(uint8_t c)
 	/* wait mini uart for tx idle. */
 	while ( (UART_FR & 0x20) ) { }
 	UART_DR = c;
+    asm volatile ("isb");
 	xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
 }
 /*-----------------------------------------------------------*/
@@ -120,16 +123,18 @@ void uart_init(void)
     UART_LCRH = ((0x3U << 5) | (0x0U << 4));    /* 8/n/1, FIFO disabled */
     UART_IMSC = (0x1U << 4);    /* RX interrupt enabled */
     UART_CR   = 0x301;          /* Enables Tx, Rx and UART */
+    asm volatile ("isb");
 
 	uartctl = pvPortMalloc(sizeof (struct UARTCTL));
 	uartctl->tx_mux = xSemaphoreCreateMutex();
 	uartctl->rx_queue = xQueueCreate(16, sizeof (uint8_t));
 
-//#if defined(__LINUX__)
+#if defined(__LINUX__)
 	uart_puts("\r\nWaiting until Linux starts booting up ...\r\n");
 	wait_linux();
-//#endif
+#endif
 
-	isr_register(IRQ_VC_UART, 0x20U, (0x1U << 0x3U), uart_isr);
+	isr_register(IRQ_VC_UART, UART_PRIORITY, (0x1U << 0x3U), uart_isr);
+    return;
 }
 /*-----------------------------------------------------------*/

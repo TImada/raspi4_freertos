@@ -37,6 +37,8 @@ OBJS +=build/queue.o
 OBJS +=build/tasks.o
 OBJS +=build/timers.o
 
+OBJS +=build/cache.o
+
 OBJS +=build/memset.o
 OBJS +=build/memcpy.o
 
@@ -50,6 +52,9 @@ build/%.o : src/%.S
 	$(CROSS)as $(ASMFLAGS) -c -o $@ $<
 	
 build/%.o : src/%.c
+	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
+
+build/%.o : ../cache/%.S
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
 build/%.o : ../musl_libc/%.c

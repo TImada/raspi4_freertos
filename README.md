@@ -10,6 +10,8 @@ Implementation is based on another FreeRTOS porting for Raspberry Pi 3 by eggman
 
 The sample application runs on the CPU core #3 on your Raspberry Pi 4B board. A specified memory region (0x20000000 - 0x207FFFFF) is dedicated to the sample application. Modify `FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/raspberrypi4.ld` if you want to change the memory usage.
 
+ARMv8-a MMU is available with VA = PA configuration. The current implementation employs 2-level address translation (1GB-page for the 1st level, 2MB-page for the 2nd level). See `FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/mmu.c` for the detail.
+
 [1] https://github.com/eggman/FreeRTOS-raspi3
 
 ## 2. Prerequisites
@@ -58,6 +60,39 @@ $ make CROSS=aarch64-none-elf-
 ```
 (`CROSS` must be changed depending on a compiler you installed)
 
+MMU is enabled by default. You can easily disable it by removing or commenting out the configure_mmu() call.
+```
+(in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/startup.S)
+...
+start_el1:
+    ...
+    // configure MMU
+    // ldr   x0, =configure_mmu
+    // blr   x0
+    ...
+```
+
+Modify the page table configuration before compiling, if you want to change the memory location.  
+(You must modify the linker script file `raspberrypi4.ld` too!)
+```
+(in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/mmu.c)
+
+/* Page table configuration array */
+#define NUM_PT_CONFIGS (5)
+static struct ptc_t pt_config[NUM_PT_CONFIGS] =
+{
+    { /* Code region (Read only) */
+        .addr = 0x20000000ULL,
+        .size = SIZE_2M,
+        .executable = XN_OFF,
+        .sharable = NON_SHARABLE,
+        .permission = READ_WRITE,
+        .policy = TYPE_MEM_CACHE_WB,
+    },
+    ...
+}
+```
+
 ## 4. Launching FreeRTOS by u-boot
 
 (1) Copy the obtained binary to your SD card
@@ -70,8 +105,8 @@ Insert your SD card into your board, then power it on.
 
 (3) Launch the FreeRTOS sample program on the u-boot prompt
 ```
+dcache off
 ext4load mmc 0:2 0x28000000 /path/to/uart.elf
-mw 0xf0 0x20000000
 dcache flush
 bootelf 0x28000000
 ```
@@ -130,10 +165,11 @@ Add `maxcpus=3` to `cmdline.txt`. This enables Linux to use only CPU cores #0-2.
 #### Launching FreeRTOS
 Same as 4-(3). Execute the following commands on the u-boot prompt.
 ```
+dcache off
 ext4load mmc 0:2 0x28000000 /path/to/uart.elf
-mw 0xf0 0x20000000
 dcache flush
 bootelf 0x28000000
+dcache on
 ```
 But you will see only a message
 ```
@@ -151,15 +187,24 @@ on the u-boot prompt. You will see Linux boot process output on UART1(mini UART)
 
 ## 6. License
 
-Derived from FreeRTOS, MIT License (see `LICENSE.md` for the detail).
+MIT License derived from FreeRTOS. See `LICENSE.md` for the detail.
 ```
-FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/
-FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/
-FreeRTOS/Source/
+./FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/
+./FreeRTOS/Source/
 ```
 
-Derived from musl libc(https://musl.libc.org/), MIT License (see individual files for the detail).
+MIT License derived from musl libc(https://musl.libc.org/). See individual files for the detail.
 
 ```
-FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/musl_libc/
+./FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/musl_libc/
+```
+
+GPL-2.0 derived from u-boot(https://github.com/u-boot/u-boot). See individual files for the detail.
+```
+./FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/cache/
+```
+
+GPL-2.0 derived from Linux(https://github.com/raspberrypi/linux).
+```
+./dts/
 ```

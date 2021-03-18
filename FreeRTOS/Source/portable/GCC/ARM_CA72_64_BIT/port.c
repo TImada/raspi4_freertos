@@ -515,21 +515,3 @@ uint32_t ulReturn;
 
 #endif /* configASSERT_DEFINED */
 /*-----------------------------------------------------------*/
-
-/*-----------------------------------------------------------
- * memcpy implementation
- *----------------------------------------------------------
- */
-void *memcpy(void *dst, const void *src, size_t n)
-{
-	/* copy per 1 byte */
-	const char *p = src;
-	char *q = dst;
-
-	while (n--) {
-		*q++ = *p++;
-	}
-
-	return dst;
-}
-
