@@ -4,7 +4,7 @@
 
 #include "interrupt.h"
 #include "board.h"
-#include "demo.h"
+#include "uart.h"
 
 /* Vector table */
 extern INTERRUPT_VECTOR InterruptHandlerFunctionTable[MAX_NUM_IRQS];
@@ -76,7 +76,7 @@ void vClearTickInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-void  vApplicationIRQHandler( uint32_t ulICCIAR )
+void vApplicationIRQHandler( uint32_t ulICCIAR )
 {
 	uint32_t ulInterruptID, val;
 
@@ -87,14 +87,25 @@ void  vApplicationIRQHandler( uint32_t ulICCIAR )
 	/* EOI notification */
 	if (ulInterruptID < 0x10) {
 		val = ((0x3U << 10) | ulInterruptID);
-	} else {
+#if 0
+	} else if (ulInterruptID == 0x3ff) {
+        return;
+#endif
+    } else {
 		val = ulInterruptID;
 	}
 	eoi_notify(val);
 
+    if (val >= MAX_NUM_IRQS) {
+        return;
+    }
+
     /* On the assumption that handlers for each interrupt are stored in an array
     called InterruptHandlerFunctionTable, use the interrupt ID to index to and
     call the relevant handler function. */
+    if (!(InterruptHandlerFunctionTable[ulInterruptID].fn)) {
+        return;
+    }
     InterruptHandlerFunctionTable[ulInterruptID].fn();
 
 	return;
