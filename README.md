@@ -185,7 +185,47 @@ run bootcmd
 ```
 on the u-boot prompt. You will see Linux boot process output on UART1(mini UART) and FreeRTOS UART output on UART2(PL011).
 
-## 6. License
+## 6. Debugging
+
+(1) Compile and install the latest OpenOCD (http://openocd.org/repos/).
+
+(2) Download a OpenOCD configuration file for Raspberry Pi 4B from [3] (Many thanks to the author!).
+Then, comment out several lines from the file as shown below.
+
+```
+...
+#   if {$_core != 0} {
+#       set _smp_command "$_smp_command $_TARGETNAME.$_core"
+#   } else {
+#       set _smp_command "target smp $_TARGETNAME.$_core"
+#   }
+...
+}
+
+# eval $_smp_command
+# targets $_TARGETNAME.0
+```
+[3] https://gist.github.com/tnishinaga/46a3380e1f47f5e892bbb74e55b3cf3e
+
+(3) Start the OpenOCD process.
+```
+$ openocd -f /path/to/your_debugger.cfg -f raspi4.cfg
+```
+
+`your_debugger.cfg` varies depending on a debugger you use. It can be found in `tcl/interface/` included in the OpenOCD source directory.
+
+(4) Connect to OpenOCD by gdb.
+```
+$ aarch64-none-elf-gdb /path/to/uart.elf
+
+(on gdb console)
+target remote localhost:3336
+```
+(`aarch64-none-elf-` must be changed depending on a compiler you installed)
+
+You are now ready to start debugging FreeRTOS running on Cortex-A72 core#3. You can add the source code path on the gdb console.
+
+## 7. License
 
 MIT License derived from FreeRTOS. See `LICENSE.md` for the detail.
 ```
