@@ -3,8 +3,6 @@
 #include <string.h>
 #include "mmu.h"
 
-extern void _invalidate_dcache_all(void);
-extern void flush_dcache_all(void);
 extern void invalidate_dcache_all(void);
 
 /* Page table configuration array */
@@ -31,9 +29,9 @@ static struct ptc_t pt_config[NUM_PT_CONFIGS] =
         .addr = 0x20600000ULL,
         .size = SIZE_2M,
         .executable = XN_ON,
-        .sharable = INNER_SHARABLE,
+        .sharable = OUTER_SHARABLE,
         .permission = READ_WRITE,
-        .policy = TYPE_MEM_CACHE_WB,
+        .policy = TYPE_MEM_CACHE_WT,
     },
     { /* Page table (Private) */
         .addr = 0x20800000ULL,
@@ -90,7 +88,6 @@ void init_regs(void)
 
     /* Cache flush (data and instruction) */
     asm volatile ("ic iallu");
-    flush_dcache_all();
     invalidate_dcache_all();
 
     asm volatile ("dsb sy");
@@ -210,7 +207,7 @@ void update_pt(void)
             (0x1ULL << 4)  |    /* EL0 stack alignment check enabled */
             (0x1ULL << 3)  |    /* Stack alignment check enabled */
             (0x1ULL << 2)  |    /* D-cache enabled */
-            (0x1ULL << 1)  |    /* Alignment check enabled */
+            (0x0ULL << 1)  |    /* Alignment check disabled */
             (0x1ULL << 0));     /* MMU enabled */
     reg &= ~(0x1ULL << 19);
     asm volatile ("msr sctlr_el1, %0" : : "r" (reg));
