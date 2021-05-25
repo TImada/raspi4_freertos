@@ -27,6 +27,11 @@ start_el2:
     eret
 
 start_el1:
+    // enable FPU
+    mrs    x1, cpacr_el1
+    mov    x0, #(3 << 20)
+    orr    x0, x1, x0
+    msr    cpacr_el1, x0
     // set sp
     adrp  x1, stack_top
     mov   sp, x1
