@@ -166,9 +166,9 @@ Add `maxcpus=3` to `cmdline.txt`. This enables Linux to use only CPU cores #0-2.
 Same as 4-(3). Execute the following commands on the u-boot prompt.
 ```
 dcache off
-ext4load mmc 0:2 0x28000000 /path/to/uart.elf
+ext4load mmc 0:2 0x30000000 /path/to/uart.elf
 dcache flush
-bootelf 0x28000000
+bootelf 0x30000000
 dcache on
 ```
 But you will see only a message
