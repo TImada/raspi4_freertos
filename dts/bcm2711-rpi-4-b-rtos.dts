@@ -65,13 +65,33 @@
 			phandle = <0x3e>;
 		};
 
-		rtos@0x20000000 {
-			size = <0x800000>;
+		rtos@20000000 {
+			compatible = "shared-dma-pool";
+			size = <0xA00000>;
 			no-map;
 			alloc-ranges = <0x0 0x0 0x20000000>;
-			phandle = <0xff>;
 		};
 	};
+
+	shm@20600000 {
+        compatible = "generic-uio";
+        status = "okay";
+        reg = <0x0 0x20600000 0x200000>;
+	};
+
+    armlocal_uio@ff800000 {
+        compatible = "generic-uio";
+        status = "okay";
+        reg = <0x0 0xff800000 0x1000>;
+        interrupt-parent = <0x1>;
+        interrupts = <0x0 0x0 0x4>;
+    };
+
+    gic_uio@40041000 {
+        compatible = "generic-uio";
+        status = "okay";
+        reg = <0x0 0x40041000 0x7000>;
+    };
 
 	thermal-zones {
 
