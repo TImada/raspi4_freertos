@@ -132,7 +132,7 @@ You will see output by the UART sample program.
 This is little bit complicated. Follow the procedure below.
 
 #### Device tree modification
-You must remove PL011 related nodes indicating UART[0,2-5] from a device tree file your board uses. You must also add a memory region 0x20000000 - 0x207FFFFF to the `reserved-memory` scope in the device tree file.
+You must remove PL011 related nodes indicating UART[0,2-5] from a device tree file your board uses. You must also add a memory region 0x20000000 - 0x209FFFFF to the `reserved-memory` scope in the device tree file.
 
 I put a modified device tree file derived from ubuntu 20.04 LTS at `./dts/bcm2711-rpi-4-b-rtos.dts` for testing. You can compile it by executing the `dtc` command below.
 
