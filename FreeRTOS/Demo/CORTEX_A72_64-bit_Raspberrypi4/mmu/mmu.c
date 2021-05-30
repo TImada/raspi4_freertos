@@ -5,7 +5,7 @@
 #include "mmu_cfg.h"
 
 extern void invalidate_dcache_all(void);
-extern struct ptc_t *pt_config;
+extern struct ptc_t pt_config[NUM_PT_CONFIGS];
 
 static volatile uint64_t sctlr_el1 = 0x0ULL;
 
@@ -183,3 +183,4 @@ void configure_mmu(void)
     return;
 }
 /*-----------------------------------------------------------*/
+
