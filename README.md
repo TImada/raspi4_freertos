@@ -16,6 +16,12 @@ ARMv8-a MMU is available with VA = PA configuration. The current implementation 
 
 ## 2. Prerequisites
 
+#### Linux installation
+
+Install 64-bit Ubuntu or Debian on your Raspberry Pi 4B.
+https://ubuntu.com/download/raspberry-pi
+https://wiki.debian.org/RaspberryPi4
+
 #### UART configuration
 
 UART1(mini UART) must be enabled to manipulate u-boot. Add `enable_uart=1` to `config.txt`. See https://www.raspberrypi.org/documentation/configuration/uart.md for the detail.
