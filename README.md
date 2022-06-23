@@ -24,7 +24,13 @@ https://wiki.debian.org/RaspberryPi4
 
 #### UART configuration
 
-UART1(mini UART) must be enabled to manipulate u-boot. Add `enable_uart=1` to `config.txt`. See https://www.raspberrypi.org/documentation/configuration/uart.md for the detail.
+![uart](imgs/uart.png)
+
+This picture illustrates an expected UART configuration. You need to prepare for two different serial consoles for each UART port dedicated to u-boot/Linux or FreeRTOS.
+
+UART1(mini UART) for u-boot must be configured to use the GPIO ALT5 setting. Add `enable_uart=1` to `config.txt`. See https://www.raspberrypi.org/documentation/configuration/uart.md for the detail.
+
+UART2(PL011) for FreeRTOS is  automatically configured to use the GPIO ALT4 setting in the FreeRTOS UART application. So you do not need to configure the UART port manually.
 
 #### Compiler installation
 
