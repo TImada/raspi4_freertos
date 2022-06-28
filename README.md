@@ -199,6 +199,14 @@ on the u-boot prompt. You will see Linux boot process output on UART1(mini UART)
 
 ## 6. Debugging
 
+#### On your Raspberry Pi 4B board
+
+(1) Boot Linux, then add `enable_jtag_gpio=1` to `config.txt`.
+
+(2) Reboot your Raspberry Pi 4B board.
+
+#### On your PC for remote debugging
+
 (1) Compile and install the latest OpenOCD (http://openocd.org/repos/).
 
 (2) Download a OpenOCD configuration file for Raspberry Pi 4B from [3] (Many thanks to the author!).
