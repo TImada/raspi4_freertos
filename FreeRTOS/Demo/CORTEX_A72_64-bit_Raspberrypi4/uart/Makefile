@@ -51,6 +51,22 @@ OBJS +=build/timers.o
 
 OBJS +=build/heap_1.o
 
+BUILDDIR =./build
+
+.PHONY: all clean
+
+all : builddir uart.elf
+
+builddir : | $(BUILDDIR)
+
+$(BUILDDIR) :
+	mkdir $@
+
+clean :
+	rm -rf ./build
+	rm -f *.elf
+	rm -f *.list
+
 uart.elf : src/raspberrypi4.ld $(OBJS)
 	$(CROSS)gcc -Wl,--build-id=none -std=gnu99 -T src/raspberrypi4.ld -o $@ -ffreestanding -nostdlib --specs=nosys.specs $(BUILTIN_OPS) $(OBJS)
 	$(CROSS)objdump -d uart.elf > uart.list
@@ -82,8 +98,4 @@ build/%.o : ../../../Source/portable/GCC/ARM_CA72_64_BIT/%.S
 build/%.o : ../../../Source/portable/MemMang/%.c
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
-clean :
-	rm -f build/*.o
-	rm -f *.elf
-	rm -f *.list
 
