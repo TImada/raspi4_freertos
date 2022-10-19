@@ -117,6 +117,7 @@ Insert your SD card into your board, then power it on.
 
 (3) Launch the FreeRTOS sample program on the u-boot prompt
 ```
+setenv autostart yes
 dcache off
 ext4load mmc 0:2 0x28000000 /path/to/uart.elf
 dcache flush
