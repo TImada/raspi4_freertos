@@ -59,7 +59,7 @@ $ make -j4 (if your PC has 4 processor cores)
 
 (3) Copy the binary to your SD card  
 ```
-$ sudo ./u-boot.bin /path/to/sd_boot_partition/kernel8.img
+$ sudo cp ./u-boot.bin /path/to/sd_boot_partition/kernel8.img
 ```
 (The new file name must be `kernel8.img`)
 
