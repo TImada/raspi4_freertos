@@ -34,7 +34,7 @@ UART2(PL011) for FreeRTOS is  automatically configured to use the GPIO ALT4 sett
 
 #### Compiler installation
 
-You need to install a GCC toolset for aarch64, and can get it from [2]. Don't forget to add its binary path to $PATH.
+You need to install a GCC toolset for aarch64, and can get it from [2]. Don't forget to add its binary path to $PATH. This should be done on your Raspi4 Linux environment.
 
 I used AArch64 ELF bare-metal target (aarch64-none-elf) version 9.2.1 for this repository.
 
@@ -85,7 +85,7 @@ start_el1:
 ```
 
 Modify the page table configuration before compiling, if you want to change the memory location.  
-(You must modify the linker script file `raspberrypi4.ld` too!)
+(You must modify i) the linker script file `raspberrypi4.ld` and ii) the device tree overly file `raspi4-rpmsg.dtso` too!)
 ```
 (in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/mmu.c)
 
@@ -144,17 +144,30 @@ You will see output by the UART sample program.
 
 This is little bit complicated. Follow the procedure below.
 
-#### Device tree modification
-You must remove PL011 related nodes indicating UART[0,2-5] from a device tree file your board uses. You must also add a memory region 0x20000000 - 0x209FFFFF to the `reserved-memory` scope in the device tree file.
+#### Device tree overlay for FreeRTOS
 
-I put a modified device tree file derived from ubuntu 20.04 LTS at `./dts/bcm2711-rpi-4-b-rtos.dts` for testing. You can compile it by executing the `dtc` command below.
+You have to build a device tree overlay binary file for FreeRTOS. This process should be done on your Raspi4 Ubuntu(Debian) environement.
 
 ```
-$ dtc -O dtb -I dts ./bcm2711-rpi-4-b-rtos.dts -o ./bcm2711-rpi-4-b-rtos.dtb
+# Install the dtc command, a device tree compiler
+$ sudo apt-get install device-tree-compiler
+
+# Build a device tree overlay binary file and copy it under /boot/firmware/overlays
+$ cd ./dts
+$ dtc -O dtb -I dts ./raspi4-rpmsg.dtso -o ./raspi4-rpmsg.dtbo 
+$ sudo cp ./raspi4-rpmsg.dtbo /boot/firmware/overlays/
+
+# Add overlay configuration "dtoverlay=raspi4-rpmsg" to the [all] section in config.txt
+$ cat /boot/firmware/config.txt
+...
+...
+
+[all]
+arm_64bit=1
+...
+...
+dtoverlay=raspi4-rpmsg
 ```
-
-You will obtain `bcm2711-rpi-4-b-rtos.dtb`. Copy it to an SD card partition where Linux kernel will load it. You may need to rename the binary dtb file or to modify a board configuration file such as `config.txt` to make it possible for Linux kernel to load it properly.
-
 
 #### Sample program compilation  
 You need to add a macro `-D__LINUX__` to `CFLAGS` in Makefile. This macro adds a special function to avoid GIC configuration change by Linux.
@@ -270,3 +283,4 @@ GPL-2.0 derived from Linux(https://github.com/raspberrypi/linux).
 ```
 ./dts/
 ```
+
