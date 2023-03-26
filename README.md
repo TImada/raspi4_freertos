@@ -178,6 +178,7 @@ Add `maxcpus=3` to `cmdline.txt`. This enables Linux to use only CPU cores #0-2.
 #### Launching FreeRTOS
 Same as 4-(3). Execute the following commands on the u-boot prompt.
 ```
+setenv autostart yes
 dcache off
 ext4load mmc 0:2 0x30000000 /path/to/uart.elf
 dcache flush
