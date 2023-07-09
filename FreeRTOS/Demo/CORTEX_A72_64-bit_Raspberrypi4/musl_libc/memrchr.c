@@ -29,14 +29,14 @@
 #include <string.h>
 
 #define weak_alias(old, new) \
-	extern __typeof(old) new __attribute__((weak, alias(#old)))
+    extern __typeof(old) new __attribute__((weak, alias(#old)))
 
 void *__memrchr(const void *m, int c, size_t n)
 {
-	const unsigned char *s = m;
-	c = (unsigned char)c;
-	while (n--) if (s[n]==c) return (void *)(s+n);
-	return 0;
+    const unsigned char *s = m;
+    c = (unsigned char)c;
+    while (n--) if (s[n]==c) return (void *)(s+n);
+    return 0;
 }
 
 weak_alias(__memrchr, memrchr);

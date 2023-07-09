@@ -31,5 +31,5 @@
 
 char *strrchr(const char *s, int c)
 {
-	return __memrchr(s, c, strlen(s) + 1);
+    return __memrchr(s, c, strlen(s) + 1);
 }

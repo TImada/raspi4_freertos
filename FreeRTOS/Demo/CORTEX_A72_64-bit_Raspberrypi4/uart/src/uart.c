@@ -26,68 +26,68 @@
 #define GPIO_PUP_PDN_CNTRL_REG0 (*(volatile unsigned int *)(GPIO_BASE+0xE4U))
 
 struct UARTCTL {
-	SemaphoreHandle_t tx_mux;
-	QueueHandle_t     rx_queue;
+    SemaphoreHandle_t tx_mux;
+    QueueHandle_t     rx_queue;
 };
 struct UARTCTL *uartctl;
 
 void uart_putchar(uint8_t c)
 {
-	xSemaphoreTake(uartctl->tx_mux, (portTickType) portMAX_DELAY);
-	/* wait until tx becomes idle. */
-	while ( UART_FR & (0x20) ) { }
-	UART_DR = c;
+    xSemaphoreTake(uartctl->tx_mux, (portTickType) portMAX_DELAY);
+    /* wait until tx becomes idle. */
+    while ( UART_FR & (0x20) ) { }
+    UART_DR = c;
     asm volatile ("isb");
-	xSemaphoreGive(uartctl->tx_mux);
+    xSemaphoreGive(uartctl->tx_mux);
 }
 /*-----------------------------------------------------------*/
 
 void uart_putchar_isr(uint8_t c)
 {
-	xSemaphoreTakeFromISR(uartctl->tx_mux, NULL);
-	/* wait mini uart for tx idle. */
-	while ( (UART_FR & 0x20) ) { }
-	UART_DR = c;
+    xSemaphoreTakeFromISR(uartctl->tx_mux, NULL);
+    /* wait mini uart for tx idle. */
+    while ( (UART_FR & 0x20) ) { }
+    UART_DR = c;
     asm volatile ("isb");
-	xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
+    xSemaphoreGiveFromISR(uartctl->tx_mux, NULL);
 }
 /*-----------------------------------------------------------*/
 
 void uart_puts(const char* str)
 {
-	for (size_t i = 0; str[i] != '\0'; i ++)
-		uart_putchar((uint8_t)str[i]);
+    for (size_t i = 0; str[i] != '\0'; i ++)
+        uart_putchar((uint8_t)str[i]);
 }
 /*-----------------------------------------------------------*/
 
 void uart_puthex(uint64_t v)
 {
-	const char *hexdigits = "0123456789ABCDEF";
-	for (int i = 60; i >= 0; i -= 4)
-		uart_putchar(hexdigits[(v >> i) & 0xf]);
+    const char *hexdigits = "0123456789ABCDEF";
+    for (int i = 60; i >= 0; i -= 4)
+        uart_putchar(hexdigits[(v >> i) & 0xf]);
 }
 /*-----------------------------------------------------------*/
 
 uint32_t uart_read_bytes(uint8_t *buf, uint32_t length)
 {
-	uint32_t num = uxQueueMessagesWaiting(uartctl->rx_queue);
-	uint32_t i;
+    uint32_t num = uxQueueMessagesWaiting(uartctl->rx_queue);
+    uint32_t i;
 
-	for (i = 0; i < num || i < length; i++) {
-		xQueueReceive(uartctl->rx_queue, &buf[i], (portTickType) portMAX_DELAY);
-	}
+    for (i = 0; i < num || i < length; i++) {
+        xQueueReceive(uartctl->rx_queue, &buf[i], (portTickType) portMAX_DELAY);
+    }
 
-	return i;
+    return i;
 }
 /*-----------------------------------------------------------*/
 
 void uart_isr(void)
 {
-	/* RX data */
-	if( !(UART_FR & (0x1U << 4)) ) {
-		uint8_t c = (uint8_t) 0xFF & UART_DR;
-		xQueueSendToBackFromISR(uartctl->rx_queue, &c, NULL);
-	}
+    /* RX data */
+    if( !(UART_FR & (0x1U << 4)) ) {
+        uint8_t c = (uint8_t) 0xFF & UART_DR;
+        xQueueSendToBackFromISR(uartctl->rx_queue, &c, NULL);
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -97,26 +97,26 @@ void uart_isr(void)
  */
 static void wait_linux(void)
 {
-	wait_gic_init();
-	return;
+    wait_gic_init();
+    return;
 }
 /*-----------------------------------------------------------*/
 
 void uart_init(void)
 {
-	uint32_t r;
+    uint32_t r;
 
     /* GPIO0 GPIO1 settings for UART2 */
-	r = GPFSEL0;
-	r &= ~((0x7U << 3) | 0x7U);
-	r |= ((0x3U << 3) | 0x3U); /* ALT4 */
-	GPFSEL0 = r;
+    r = GPFSEL0;
+    r &= ~((0x7U << 3) | 0x7U);
+    r |= ((0x3U << 3) | 0x3U); /* ALT4 */
+    GPFSEL0 = r;
 
     r = GPIO_PUP_PDN_CNTRL_REG0;
-	r &= ~((0x3U << 2) | 0x3U);
-	GPIO_PUP_PDN_CNTRL_REG0 = r;
+    r &= ~((0x3U << 2) | 0x3U);
+    GPIO_PUP_PDN_CNTRL_REG0 = r;
 
-	/* PL011 settings with assumption of 48MHz clock */
+    /* PL011 settings with assumption of 48MHz clock */
     UART_ICR  = 0x7FFU;         /* Clears an interrupt */
     UART_IBRD = 0x1AU;          /* 115200 baud */
     UART_FBRD = 0x3U;
@@ -125,16 +125,16 @@ void uart_init(void)
     UART_CR   = 0x301;          /* Enables Tx, Rx and UART */
     asm volatile ("isb");
 
-	uartctl = pvPortMalloc(sizeof (struct UARTCTL));
-	uartctl->tx_mux = xSemaphoreCreateMutex();
-	uartctl->rx_queue = xQueueCreate(16, sizeof (uint8_t));
+    uartctl = pvPortMalloc(sizeof (struct UARTCTL));
+    uartctl->tx_mux = xSemaphoreCreateMutex();
+    uartctl->rx_queue = xQueueCreate(16, sizeof (uint8_t));
 
 #if defined(__LINUX__)
-	uart_puts("\r\nWaiting until Linux starts booting up ...\r\n");
-	wait_linux();
+    uart_puts("\r\nWaiting until Linux starts booting up ...\r\n");
+    wait_linux();
 #endif
 
-	isr_register(IRQ_VC_UART, UART_PRIORITY, (0x1U << 0x3U), uart_isr);
+    isr_register(IRQ_VC_UART, UART_PRIORITY, (0x1U << 0x3U), uart_isr);
     return;
 }
 /*-----------------------------------------------------------*/
