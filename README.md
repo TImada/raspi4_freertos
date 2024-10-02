@@ -84,10 +84,24 @@ start_el1:
     ...
 ```
 
-Modify the page table configuration before compiling, if you want to change the memory location.  
-(You must modify i) the linker script file `raspberrypi4.ld` and ii) the device tree overly file `raspi4-rpmsg.dtso` too!)
+If you want to change the memory location, you need to modify several things before compiling:
+
+i) the linker script file `raspberrypi4.ld`,
+
 ```
-(in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/mmu.c)
+(in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/raspberrypi4.ld)
+...
+CODE_BASE   = 0x20000000;
+DATA_BASE   = 0x20200000;
+STACK_TOP   = 0x20600000;
+PT_BASE     = 0x20600000;
+...
+```
+
+ii) the page table configuration and
+
+```
+(in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/mmu_cfg.c)
 
 /* Page table configuration array */
 #define NUM_PT_CONFIGS (5)
@@ -101,8 +115,53 @@ static struct ptc_t pt_config[NUM_PT_CONFIGS] =
         .permission = READ_WRITE,
         .policy = TYPE_MEM_CACHE_WB,
     },
+    { /* Data region */
+        .addr = 0x20200000ULL,
+        .size = SIZE_4M,
+        .executable = XN_ON,
+        .sharable = INNER_SHARABLE,
+        .permission = READ_WRITE,
+        .policy = TYPE_MEM_CACHE_WB,
+    },
+    { /* Data region (Shared for OpenAMP) */
+        .addr = 0x20600000ULL,
+        .size = SIZE_2M,
+        .executable = XN_ON,
+        .sharable = OUTER_SHARABLE,
+        .permission = READ_WRITE,
+        .policy = TYPE_MEM_CACHE_WT,
+    },
     ...
 }
+```
+
+
+
+iii) the device tree overlay file `raspi4-rpmsg.dtso` too!
+
+```
+(in dts/raspi4-rpmsg.dtso)
+
+    fragment@0 {
+        target-path="/reserved-memory";
+        __overlay__ {
+            rtos@20000000 {
+                compatible = "shared-dma-pool";
+                size = <0xA00000>;
+                no-map;
+                alloc-ranges = <0x0 0x0 0x20000000>;
+            };
+        };
+    };
+
+    fragment@1 {
+        target-path="/";
+        __overlay__ {
+            shm@20600000 {
+                compatible = "generic-uio";
+                status = "okay";
+                reg = <0x0 0x20600000 0x200000>;
+            };
 ```
 
 ## 4. Launching FreeRTOS by u-boot
