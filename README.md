@@ -216,45 +216,43 @@ on the u-boot prompt. You will see Linux boot process output on UART1(mini UART)
 
 #### On your Raspberry Pi 4B board
 
-(1) Boot Linux, then add `enable_jtag_gpio=1` to `config.txt`.
+(1) Boot Linux, then add `enable_jtag_gpio=1` to `/boot/firmware/config.txt`. After that, shutdown Linux.
 
-(2) Reboot your Raspberry Pi 4B board.
+(2) Connect your debugger probe and Raspberry Pi 4B board. (See https://sysprogs.com/VisualKernel/tutorials/raspberry/jtagsetup/ for details)
+
+(3) Power your board on. Then stop the boot process at the u-boot prompt like the following.
+
+```
+(u-boot console log)
+ ...
+Hit any key to stop autoboot:  3
+U-Boot>
+```
+
+#### On your PC for program compilation
+
+Rebuild a target program (uart.elf) with the debug option `-g` to add debug symbols.
 
 #### On your PC for remote debugging
 
 (1) Compile and install the latest OpenOCD (http://openocd.org/repos/).
 
-(2) Download a OpenOCD configuration file for Raspberry Pi 4B from [3] (Many thanks to the author!).
-Then, comment out several lines from the file as shown below.
-
+(2) Start the OpenOCD process.
 ```
-...
-#   if {$_core != 0} {
-#       set _smp_command "$_smp_command $_TARGETNAME.$_core"
-#   } else {
-#       set _smp_command "target smp $_TARGETNAME.$_core"
-#   }
-...
-}
-
-# eval $_smp_command
-# targets $_TARGETNAME.0
-```
-[3] https://gist.github.com/tnishinaga/46a3380e1f47f5e892bbb74e55b3cf3e
-
-(3) Start the OpenOCD process.
-```
-$ openocd -f /path/to/your_debugger.cfg -f raspi4.cfg
+$ sudo openocd -f /path/to/your_debugger.cfg -f /path/to/rpi4b.cfg
 ```
 
 `your_debugger.cfg` varies depending on a debugger you use. It can be found in `tcl/interface/` included in the OpenOCD source directory.
 
-(4) Connect to OpenOCD by gdb.
+`rpi4b.cfg` can be found in `tcl/board/` included in the OpenOCD source directory.
+
+(3) Connect to OpenOCD by gdb.
 ```
 $ aarch64-none-elf-gdb /path/to/uart.elf
 
 (on gdb console)
-target remote localhost:3336
+target extended-remote :3336
+load
 ```
 (`aarch64-none-elf-` must be changed depending on a compiler you installed)
 
