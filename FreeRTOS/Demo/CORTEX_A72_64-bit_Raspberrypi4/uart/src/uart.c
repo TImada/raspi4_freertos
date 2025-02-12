@@ -1,6 +1,5 @@
 /* uart.c */
 #include <stddef.h>
-#include <stdint.h>
 
 #include "FreeRTOS.h"
 #include "board.h"
