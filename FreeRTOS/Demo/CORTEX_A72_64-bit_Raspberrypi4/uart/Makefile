@@ -1,4 +1,7 @@
 CROSS ?= aarch64-none-elf-
+
+APP_NAME = uart
+
 CFLAGS = -mcpu=cortex-a72 \
          -fpic \
          -ffreestanding \
@@ -55,7 +58,7 @@ BUILDDIR =./build
 
 .PHONY: all clean
 
-all : builddir uart.elf
+all : builddir $(APP_NAME).elf
 
 builddir : | $(BUILDDIR)
 
@@ -65,11 +68,10 @@ $(BUILDDIR) :
 clean :
 	rm -rf ./build
 	rm -f *.elf
-	rm -f *.list
+	rm -f *.map
 
-uart.elf : src/raspberrypi4.ld $(OBJS)
-	$(CROSS)gcc -Wl,--build-id=none -std=gnu99 -T src/raspberrypi4.ld -o $@ -ffreestanding -nostdlib --specs=nosys.specs $(BUILTIN_OPS) $(OBJS)
-	$(CROSS)objdump -d uart.elf > uart.list
+$(APP_NAME).elf : src/raspberrypi4.ld $(OBJS)
+	$(CROSS)gcc -Wl,-Map=$(APP_NAME).map -Wl,--build-id=none -std=gnu99 -T src/raspberrypi4.ld -o $@ -ffreestanding -nostdlib --specs=nosys.specs $(BUILTIN_OPS) $(OBJS)
 
 build/%.o : src/%.S
 	$(CROSS)as $(ASMFLAGS) -c -o $@ $<
