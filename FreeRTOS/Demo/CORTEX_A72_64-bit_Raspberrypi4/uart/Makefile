@@ -13,16 +13,13 @@ CFLAGS = -mcpu=cortex-a72 \
          -I$(INCLUDEPATH1) \
          -I$(INCLUDEPATH2) \
          -I$(INCLUDEPATH3) \
-         -I$(INCLUDEPATH4) \
-         -I$(INCLUDEPATH5)
-BUILTIN_OPS = -fno-builtin-memset
+         -I$(INCLUDEPATH4) 
 ASMFLAGS = -mcpu=cortex-a72
 
 INCLUDEPATH1 ?= ./src
-INCLUDEPATH2 ?= ../musl_libc
-INCLUDEPATH3 ?= ../mmu
-INCLUDEPATH4 ?= ../../../Source/include
-INCLUDEPATH5 ?= ../../../Source/portable/GCC/ARM_CA72_64_BIT
+INCLUDEPATH2 ?= ../mmu
+INCLUDEPATH3 ?= ../../../Source/include
+INCLUDEPATH4 ?= ../../../Source/portable/GCC/ARM_CA72_64_BIT
 
 # From ./src
 OBJS = build/startup.o 
@@ -38,10 +35,6 @@ OBJS +=build/mmu.o
 
 # From ../cache
 OBJS +=build/cache.o
-
-# From ../musl_libc
-OBJS +=build/memset.o
-OBJS +=build/memcpy.o
 
 # From ../../../Source/portable/GCC/ARM_CA72_64_BIT
 OBJS +=build/port.o
@@ -71,7 +64,7 @@ clean :
 	rm -f *.map
 
 $(APP_NAME).elf : src/raspberrypi4.ld $(OBJS)
-	$(CROSS)gcc -Wl,-Map=$(APP_NAME).map -Wl,--build-id=none -std=gnu99 -T src/raspberrypi4.ld -o $@ -ffreestanding -nostdlib --specs=nosys.specs $(BUILTIN_OPS) $(OBJS)
+	$(CROSS)gcc -Wl,-Map=$(APP_NAME).map -Wl,--build-id=none -std=gnu99 -T src/raspberrypi4.ld -o $@ -ffreestanding --specs=rdimon.specs $(OBJS)
 
 build/%.o : src/%.S
 	$(CROSS)as $(ASMFLAGS) -c -o $@ $<
@@ -85,9 +78,6 @@ build/%.o : ../mmu/%.c
 build/%.o : ../cache/%.S
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
-build/%.o : ../musl_libc/%.c
-	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
-
 build/%.o : ../../../Source/%.c
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
 
@@ -99,5 +89,4 @@ build/%.o : ../../../Source/portable/GCC/ARM_CA72_64_BIT/%.S
 
 build/%.o : ../../../Source/portable/MemMang/%.c
 	$(CROSS)gcc $(CFLAGS)  -c -o $@ $<
-
 

@@ -10,9 +10,9 @@ extern struct ptc_t pt_config[NUM_PT_CONFIGS];
 static volatile uint64_t sctlr_el1 = 0x0ULL;
 
 /* Page table descriptors and entries */
-static __attribute__((aligned(4096))) uint64_t l1ptd[NUM_L1_DESC] __attribute__((section(".pt")));
-static __attribute__((aligned(4096))) uint64_t l2pte[NUM_L1_DESC * NUM_L2_ENTRY] __attribute__((section(".pt")));
-static __attribute__((aligned(4096))) uint64_t l1ptd_dummy[NUM_L1_DESC] __attribute__((section(".pt")));
+static __attribute__((aligned(4096))) uint64_t l1ptd[NUM_L1_DESC] __attribute__((section(".pt"))) = {0};
+static __attribute__((aligned(4096))) uint64_t l2pte[NUM_L1_DESC * NUM_L2_ENTRY] __attribute__((section(".pt"))) = {0};
+static __attribute__((aligned(4096))) uint64_t l1ptd_dummy[NUM_L1_DESC] __attribute__((section(".pt"))) = {0};
 
 /* Zeros all the page table descriptors and entries */
 void init_pt(void)
@@ -177,7 +177,6 @@ void update_pt(void)
 void configure_mmu(void)
 {
     init_regs();
-    init_pt();
     update_pt();
 
     return;

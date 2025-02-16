@@ -325,12 +325,6 @@ MIT License derived from FreeRTOS. See `LICENSE.md` for the detail.
 ./FreeRTOS/Source/
 ```
 
-MIT License derived from musl libc(https://musl.libc.org/). See individual files for the detail.
-
-```
-./FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/musl_libc/
-```
-
 GPL-2.0 derived from u-boot(https://github.com/u-boot/u-boot). See individual files for the detail.
 ```
 ./FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/cache/

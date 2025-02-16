@@ -38,11 +38,25 @@ SECTIONS
     .bss :
     {
         . = ALIGN(4096); /* align to page size */
+        __bss_start__ = .;
         __bss_start = .;
         bss = .;
         *(.bss)
+        __bss_end__ = .;
         __bss_end = .;
-        __end = .;
+    } > DATA
+
+    .heap :
+    {
+        . = ALIGN(4096); /* align to page size */
+        __heap_start__ = .;
+        end = __heap_start__;
+        _end = end;
+        __end = end;
+        __end__ = end;
+        KEEP(*(.heap))
+        __heap_end__ = .;
+        __HeapLimit = __heap_end__;
     } > DATA
 
     .stack :
