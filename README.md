@@ -36,7 +36,7 @@ UART2(PL011) for FreeRTOS is  automatically configured to use the GPIO ALT4 sett
 
 You need to install a GCC toolset for aarch64, and can get it from [2]. Don't forget to add its binary path to $PATH. This should be done on your Raspi4 Linux environment.
 
-I used AArch64 ELF bare-metal target (aarch64-none-elf) version 9.2.1 for this repository.
+I used AArch64 ELF bare-metal target (aarch64-none-elf) version 14.2.1 for this repository.
 
 [2] https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
 
