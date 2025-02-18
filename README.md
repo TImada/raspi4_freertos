@@ -148,9 +148,8 @@ iii) the device tree overlay file `raspi4-rpmsg.dtso` too!
         __overlay__ {
             rtos@20000000 {
                 compatible = "shared-dma-pool";
-                size = <0xA00000>;
                 no-map;
-                alloc-ranges = <0x0 0x0 0x20000000>;
+                reg = <0x0 0x20000000 0xA00000>;
             };
         };
     };
@@ -164,6 +163,8 @@ iii) the device tree overlay file `raspi4-rpmsg.dtso` too!
                 reg = <0x0 0x20600000 0x200000>;
             };
 ```
+
+<u>If you also use another device tree overlay file for Raspberry Pi 4B (e.g. `vc4-kms-v3d`), the memory configuration of it may conflict with that of this sample. You will have to fix any conflict if you find it in `dmesg` output.</u>
 
 ## 4. Launching FreeRTOS by u-boot
 
