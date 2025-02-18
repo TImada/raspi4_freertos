@@ -45,9 +45,11 @@ I used AArch64 ELF bare-metal target (aarch64-none-elf) version 14.2.1 for this 
 A pre-built u-boot image provided by Ubuntu or Debian may not have the `dcache` command on the u-boot prompt. You need compile and install u-boot having cache management commands if u-boot provided by your Linux distribution does not have them.
 
 (1) Source code download  
+
 `$ git clone https://github.com/u-boot/u-boot`  
 
 (2) Compilation
+
 ```
 $ cd u-boot
 $ export CROSS_COMPILE=aarch64-none-elf-
@@ -55,24 +57,30 @@ $ echo 'CONFIG_CMD_CACHE=y' >> ./configs/rpi_4_defconfig
 $ make rpi_4_defconfig
 $ make -j4 (if your PC has 4 processor cores)
 ```
+
 (`CROSS_COMPILE` must be changed depending on a compiler you installed)
 
 (3) Copy the binary to your SD card  
+
 ```
 $ sudo cp ./u-boot.bin /path/to/sd_boot_partition/kernel8.img
 ```
+
 (The new file name must be `kernel8.img`)
 
 ## 3. FreeRTOS UART sample build
 
 Very simple! Just execute the following commands.
+
 ```
 $ cd Demo/CORTEX_A72_64-bit_Raspberrypi4/uart
 $ make CROSS=aarch64-none-elf-
 ```
+
 (`CROSS` must be changed depending on a compiler you installed)
 
 MMU is enabled by default. You can easily disable it by removing or commenting out the configure_mmu() call.
+
 ```
 (in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/startup.S)
 ...
@@ -92,9 +100,12 @@ i) the linker script file `raspberrypi4.ld`,
 (in FreeRTOS/Demo/CORTEX_A72_64-bit_Raspberrypi4/uart/src/raspberrypi4.ld)
 ...
 CODE_BASE   = 0x20000000;
-DATA_BASE   = 0x20200000;
-STACK_TOP   = 0x20600000;
-PT_BASE     = 0x20600000;
+CODE_SIZE   = 0x00200000;
+DATA_BASE   = CODE_BASE + CODE_SIZE;
+DATA_SIZE   = 0x00400000;
+STACK_TOP   = DATA_BASE + DATA_SIZE; /* STACK in the upper end of DATA */
+PT_BASE     = DATA_BASE + DATA_SIZE;
+PT_SIZE     = 0x00200000;
 ...
 ```
 
@@ -123,19 +134,9 @@ static struct ptc_t pt_config[NUM_PT_CONFIGS] =
         .permission = READ_WRITE,
         .policy = TYPE_MEM_CACHE_WB,
     },
-    { /* Data region (Shared for OpenAMP) */
-        .addr = 0x20600000ULL,
-        .size = SIZE_2M,
-        .executable = XN_ON,
-        .sharable = OUTER_SHARABLE,
-        .permission = READ_WRITE,
-        .policy = TYPE_MEM_CACHE_WT,
-    },
     ...
 }
 ```
-
-
 
 iii) the device tree overlay file `raspi4-rpmsg.dtso` too!
 
